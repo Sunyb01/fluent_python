@@ -33,10 +33,10 @@ def x(s1, *args, **keyword):
 
 
 def y(s1, s2, *args, city):
-    print(f'{s1} \n {s2} \n {args}')
+    print(f'{s1} \n {s2} \n {args}, {city}')
 
 
 if __name__ == '__main__':
     unpacking_with_match_case()
     x('zs', 'china', 18, x=3)
-    y('zs', 'china', 18, 12, city='ss')
+    y('zs', 'china', 18, 12, 15, city='ss')
