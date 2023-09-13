@@ -25,6 +25,7 @@ def unpacking_with_match_case():
             case [name, _, _, (lat, lon) as rc]:
                 print(f'{name:1} | {lat:9.4f} | {lon:9.4f}, {rc}')
             case _:
+                # 在任何语言中, 提供一个兜底的默认选型都不会有太大的问题; 反而有可能提醒我们发生了什么
                 print('this is default')
 
 
@@ -35,6 +36,9 @@ def x(s1, *args, **keyword):
 def y(s1, s2, *args, city):
     print(f'{s1} \n {s2} \n {args}, {city}')
 
+
+def method_param_type_test(s1: str, s2: int):
+    print(f'{s1}, {s2}')
 
 if __name__ == '__main__':
     unpacking_with_match_case()
