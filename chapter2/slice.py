@@ -62,6 +62,46 @@ def test_nested_list():
     print(b2)
 
 
+def add_assign_list():
+    l = [1, 2, 3, ]
+    print(id(l))
+    l *= 2
+    print(id(l))
+
+
+def add_assign_tuple():
+    t = (1, 2, 3, )
+    print(id(t))
+    t *= 2 # 内存指向发生了变更
+    print(t)
+    print(id(t))
+
+# 注意:
+# 不要再元组中放置可变的项
+# 增量赋值不是原子操作
+def a_puzzle():
+    # 会报出类型错误, 同时t[2]也被赋值成功
+    t = (1, 2, [30, 40, ],)
+    t[2] += [50, 60, ]
+    print(t)
+
+def test_list_sort(tar):
+    if tar:
+        list.sort(tar) # 返回None, 告知是在原基础上修改; key代表函数, 作用到每一项上; reverse代表是否降序, 默认为false
+        print(tar)
+
+def test_list_sort2(tar):
+    if tar:
+        tar.sort() # 返回None, 告知是在原基础上修改; key代表函数, 作用到每一项上; reverse代表是否降序, 默认为false
+        print(tar)
+
+def test_sorted(tar):
+    if tar:
+        print(tar)
+        nt = sorted(tar) # 不更改原可迭代对象, 生成一个新的对象; key代表函数, 作用到每一项上;reverse代表是否降序, 默认为false
+        print(tar)
+        print(nt)
+
 if __name__ == '__main__':
     l = [1, 2, 3, 4, 5, 6, 7]
     # split_slice_with_index(l, 4)
@@ -69,4 +109,10 @@ if __name__ == '__main__':
     # slice_split(l, slice(1,len(l)))
     # test_assign_slice()
     # fast_append()
-    test_nested_list()
+    # test_nested_list()
+    # add_assign_list()
+    # add_assign_tuple()
+    # a_puzzle()
+    # test_list_sort([1, 5, 2, 3,9, 7])
+    # test_list_sort2([1, 5, 2, 3,9, 7])
+    # test_sorted([1, 5, 2, 3,9, 7])
