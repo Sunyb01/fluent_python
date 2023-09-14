@@ -53,6 +53,7 @@ def first_generate_lambda():
     return tuple(gen_lam)
 
 
+
 def gen_lam_tshirt():
     colors = ['black', 'white']
     sizes = ['S', 'M', 'L']
