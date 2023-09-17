@@ -1,7 +1,15 @@
 # dict
-from collections import OrderedDict, abc
+import collections
+from collections import OrderedDict, abc, ChainMap, Counter
+import re
+import sys
+import builtins
+
+
 # 1. 字典api
 # 1. setdefault(key, default_value); 返回key对应的value, 如果不存在, 将value设置为default_value, 并返回key对应的value -> default_value
+# 2. 创建新的dict应该继承UserDict而不是dict
+
 
 # 1. 字典推导式
 def dict_generate():
@@ -19,16 +27,19 @@ def dict_generate():
 def mapping_unpacking(**keywords):
     return keywords
 
+
 def merge_for_new_feature():
     d1 = {'a': 1, 'b': 3}
     d2 = {'a': 2, 'b': 4, 'c': 6}
     return d1 | d2
+
 
 def merge_for_new_feature_modify():
     d1 = {'a': 1, 'b': 3}
     d2 = {'a': 2, 'b': 4, 'c': 6}
     d1 |= d2
     print('d1 = ', d1)
+
 
 def match_case_dict(record: dict) -> list:
     # 与序列不同, 计算只有部分匹配, 映射模式也算成功匹配
@@ -45,17 +56,78 @@ def match_case_dict(record: dict) -> list:
         case _:
             raise ValueError(f'Invalid \'book\' record: {record!r}')
 
+
 def type_match():
     my_dict = {}
     print(isinstance(my_dict, abc.Mapping))
     print(isinstance(my_dict, abc.MutableMapping))
 
-def test_method_update():
+
+def method_update_test():
     d1 = {'a': 1, 'b': 3}
     d2 = {'d': 2, 'e': 4, 'c': 6}
     # 使用d2更新d1
     d1.update(d2)
     print(d1)
+
+
+def defaultdict_test():
+    WORD_RE = re.compile(r'\w+')
+    # 将list()函数, 作为default_factory; 如果index[key]的值不存在, 则使用default_factory创建默认值;
+    # 如果没有提供作为default_factory, 遇到缺失的键会抛出KeyError
+    # defaultdict只会为index[key]提供初始化的默认值, 但是index.get(key)依然会返回None, 而且key in index 也会返回False
+    index = collections.defaultdict(default_factory=list)
+    with open(sys.argv[1], encoding='utf-8') as fp:
+        for line_no, line in enumerate(fp, 1):
+            for match in WORD_RE.finditer(line):
+                word = match.group()
+                column_no = match.start() + 1
+                location = (line_no, column_no)
+                index[word].append(location)
+
+    for word in sorted(index, key=str.upper):
+        print(word, index[word])
+
+
+def chain_map_test():
+    d1 = dict(a=1, b=2)
+    d2 = dict(a=6, c=3, d=4)
+    c1 = ChainMap(d1, d2)
+    print(c1['a'])
+    print(c1['d'])
+    # 只影响第一个映射
+    c1['c'] = -1
+    print(d1)
+    print(d2)
+
+
+def buildin_test():
+    pylookup = ChainMap(locals(), globals(), vars(builtins))
+    print(pylookup)
+
+
+def method_counter_test():
+    # 可以查找键的数量
+    ct = Counter('abracadabra')
+    print(ct)
+    ct.update('aaaaazzz')
+    print(ct)
+    mc = ct.most_common(3)
+    print(mc)
+
+
+class StrKeyDict(collections.UserDict):
+
+    def __missing__(self, key):
+        if isinstance(key, str):
+            raise KeyError(key)
+        return self[str(key)]
+
+    def __contains__(self, item):
+        return str(item) in self.data
+
+    def __setitem__(self, key, value):
+        self.data[str(key)] = value
 
 
 if __name__ == '__main__':
@@ -68,4 +140,7 @@ if __name__ == '__main__':
     # 第三个case, 会报错
     # print(match_case_dict({'type':'book', 'package':100}))
     # type_match()
-    test_method_update()
+    # defaultdict_test()
+    # chain_map_test()
+    # buildin_test()
+    method_counter_test()
