@@ -4,6 +4,7 @@ from collections import OrderedDict, abc, ChainMap, Counter
 import re
 import sys
 import builtins
+from types import MappingProxyType
 
 
 # 1. 字典api
@@ -129,6 +130,28 @@ class StrKeyDict(collections.UserDict):
     def __setitem__(self, key, value):
         self.data[str(key)] = value
 
+def immutable_mapping():
+    d1 = {'a': 1, 'b': 3}
+    d2 = MappingProxyType(d1)
+    print(d2)
+    # 不可访问的
+    d2['a'] = 2
+
+def dict_values_view():
+    d1 = {'a': 1, 'b': 3}
+    # values视图是可迭代的
+    values = d1.values()
+    print(values)
+    print(len(values))
+    print(list(values))
+    # 视图实现了__reversed__方法, 返回一个自定义迭代器
+    print(reversed(values))
+    # 不支持获取视图中的项
+    # print(values[0])
+    d1['c'] = 4
+    # 视图是动态代理的, 原dict更新后, 视图会同步更新
+    # 视图支持&、|、-、^等四种集合运算; 仅当dict中的所有值均可哈希时, dict_items视图才可当做集合使用
+    print(values)
 
 if __name__ == '__main__':
     # dict_generate()
@@ -143,4 +166,6 @@ if __name__ == '__main__':
     # defaultdict_test()
     # chain_map_test()
     # buildin_test()
-    method_counter_test()
+    # method_counter_test()
+    # immutable_mapping()
+    dict_values_view()
