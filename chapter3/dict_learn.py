@@ -130,12 +130,14 @@ class StrKeyDict(collections.UserDict):
     def __setitem__(self, key, value):
         self.data[str(key)] = value
 
+
 def immutable_mapping():
     d1 = {'a': 1, 'b': 3}
     d2 = MappingProxyType(d1)
     print(d2)
     # 不可访问的
     d2['a'] = 2
+
 
 def dict_values_view():
     d1 = {'a': 1, 'b': 3}
@@ -152,6 +154,7 @@ def dict_values_view():
     # 视图是动态代理的, 原dict更新后, 视图会同步更新
     # 视图支持&、|、-、^等四种集合运算; 仅当dict中的所有值均可哈希时, dict_items视图才可当做集合使用
     print(values)
+
 
 if __name__ == '__main__':
     # dict_generate()

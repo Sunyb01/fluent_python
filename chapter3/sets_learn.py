@@ -5,8 +5,9 @@
 #     3. frozenset可以哈希
 #     4. 中缀运算符, a|b(并集), a&b(交集), a-b(差集), a^b(对称差集)
 # 构造: set(), 获取{....}形式, 如{1}; 如果写作{}, 代表dict类型
-
+# 字典是python的基石
 from unicodedata import name
+
 
 def first_sets():
     l = ['a', 'b', 'a', 'c', 'd', 'b', 'e']
@@ -17,6 +18,7 @@ def first_sets():
     d = dict.fromkeys(l).keys()
     print(d)
 
+
 def infix_operation():
     # 两个操作对象必须都是集合
     s1 = {'a', 'b', 'a', 'c', 'd', 'b', 'e'}
@@ -25,6 +27,7 @@ def infix_operation():
     print(len(s1 & s2))
     print(len(s1 - s2))
     print(len(s1 ^ s2))
+
 
 def set_derivation():
     s = {chr(i) for i in range(32, 256) if 'SIGN' in name(chr(i), '')}
