@@ -1,9 +1,14 @@
+# coding: utf-8
 # 字符问题
 # Note:
 #      1. 可以使用熟悉的字符串方法处理二进制序列, 如:endswith、replace、strip、translate、upper等
 #      2. 如果正则表达式编译自二进制序列而不是字符串, 那么re模块中的正则表达式函数也能处理二进制序列
 
 import array
+import os
+import locale
+import sys
+
 def code():
     # 把码点转换为字节序列称为编码; 把字节序列转为码点称为解码
     # 将字节序列变为人类可读的字符串是解码, 将字符串变成用于存储或传输的字节序列是编码
@@ -35,8 +40,51 @@ def array_2_bytes():
     print(octets)
 
 
+def for_loop_codec():
+    for codec in ['latin_1', 'utf_8', 'utf_16', ]:
+        print(codec, 'El Nino'.encode(codec), sep='\t')
+
+def process_str():
+    with open('cafe.txt', 'w', encoding='utf_8') as fp:
+        # 空格占用一个字节
+        fp.write("hello world!")
+
+    size = os.stat('cafe.txt').st_size
+    print(size)
+    with open('cafe.txt', 'r') as fp:
+        print(fp.encoding)
+        print(fp)
+        for line in fp.readlines():
+            print(line)
+    with open('cafe.txt', 'rb') as fp:
+        print(fp)
+        for line in fp.readlines():
+            print(line)
+
+def print_default_env():
+    expressions = """
+        locale.getpreferredencoding()
+        type(my_file)
+        my_file.encoding
+        sys.stdout.isatty()
+        sys.stdout.encoding
+        sys.stdin.isatty()
+        sys.stdin.encoding
+        sys.stderr.isatty()
+        sys.stderr.encoding
+        sys.getdefaultencoding()
+        sys.getfilesystemencoding()
+    """
+    my_file = open('dummy', 'w')
+    for expression in expressions.split():
+        value = eval(expression)
+        print(f'{expression:>30} -> {value!r}')
+
 if __name__ == '__main__':
     # code()
     # bytes_and_bytearray()
     # parse_hex()
-    array_2_bytes()
+    # array_2_bytes()
+    # for_loop_codec()
+    # process_str()
+    print_default_env()
