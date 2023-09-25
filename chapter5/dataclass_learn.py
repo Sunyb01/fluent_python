@@ -9,7 +9,6 @@
 #      3. 带类型的类属性, field_name:typing.ClassVar[set[str]] = set()
 
 
-
 from dataclasses import dataclass
 
 
@@ -19,6 +18,8 @@ class DemoDataClass:
     b: float = 1.1
     # 类属性
     c = 'spam'
+
+
 def print_dataclass_annotations():
     print(DemoDataClass.__annotations__)
     print(DemoDataClass.__doc__)
