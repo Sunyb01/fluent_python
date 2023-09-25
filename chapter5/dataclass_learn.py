@@ -7,7 +7,7 @@
 #         default_factory可以是函数、类或其他可调用对象
 #      2. python3.9开始支持泛型如 list[str]
 #      3. 带类型的类属性, field_name:typing.ClassVar[set[str]] = set()
-
+# 也可以使用attrs替换dataclass
 
 from dataclasses import dataclass
 
