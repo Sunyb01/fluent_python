@@ -17,6 +17,7 @@ def same_equal_alias():
     # 比较的是id(instance), 也就是标识(内存地址)
     print(ales is not charles)
 
+
 def compare_is_and_eq_mark():
     """
         ==运算符比较的是两个对象的值, is比较对象的标识;
@@ -48,6 +49,7 @@ def tuple_relative_immutability():
     print(t1)
     print(t1 == t2)
 
+
 def default_shallow_copy():
     l1 = [1, 2, [30, 40, ]]
     l2 = list(l1)
@@ -77,10 +79,12 @@ def default_shallow_copy2():
     print('l1:', l1)
     print('l2:', l2)
 
+
 class HauntedBus:
     """
         一个手幽灵乘客折磨的校车
     """
+
     def __init__(self, passengers=[]):
         """
             这里的passengers相当于java中的类属性了;
@@ -94,6 +98,7 @@ class HauntedBus:
 
     def drop(self, name):
         self.passengers.remove(name)
+
 
 def haunted_bus():
     bus1 = HauntedBus(['Alice', 'Bill', ])
