@@ -117,10 +117,40 @@ def haunted_bus():
     print(HauntedBus.__init__.__defaults__)
 
 
+class TwilightBus:
+    """
+        让乘客销声匿迹的校车
+    """
+
+    def __init__(self, passengers=None):
+        if passengers is None:
+            passengers = []
+        else:
+            # self.passengers = passengers # 这是错误的
+            self.passengers = list(passengers)
+
+    def pick(self, name):
+        self.passengers.append(name)
+
+    def drop(self, name):
+        self.passengers.remove(name)
+
+
+def missing_student():
+    basketball_team = ['Sue', 'Tina', 'Maya', 'Diana', 'Pat', ]
+    bus = TwilightBus(basketball_team)
+    # 因为使用的是同一个对象的引用, 所以这里直接改变了原内存中的数据
+    bus.drop('Tina')
+    bus.drop('Pat')
+    print(basketball_team)
+    print(bus)
+
+
 if __name__ == '__main__':
     # same_equal_alias()
     # compare_is_and_eq_mark()
     # tuple_relative_immutability()
     # default_shallow_copy()
     # default_shallow_copy2()
-    haunted_bus()
+    # haunted_bus()
+    missing_student()
