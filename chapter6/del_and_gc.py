@@ -4,8 +4,9 @@
 
 import weakref
 
+
 def first_del():
-    a = [1, 2, 3,]
+    a = [1, 2, 3, ]
     b = a
     # 删除引用a, 而不删除对象
     del a
@@ -22,6 +23,7 @@ def call_del():
     print(ender.alive)
     s2 = 'span'
     print(ender.alive)
+
 
 def bye():
     print('.....like tears, in rain')
@@ -51,6 +53,7 @@ def str_var_for_share():
     s1 = 'ABC'
     s2 = 'ABC'
     print(s2 is s1)
+
 
 if __name__ == '__main__':
     # first_del()
