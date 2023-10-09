@@ -13,6 +13,7 @@
 #   8. 原生协程函数. 使用async def定义的函数或方法. 如async factorial(n)
 #   9. 异步生成器函数. 使用async def定义, 而且主体中有yield关键字的函数或方法;
 # 注意生成器、原生协程和异步生成器函数的返回值不是应用程序数据, 而是需要进一步处理的对象, 要么产出应用程序数据, 要么执行某种操作;
+# 可以通过callable()函数测试是否可以调用
 
 from functools import reduce
 from operator import add
@@ -71,9 +72,14 @@ def higher_order_function_replacement():
     print(sum(range(100)))
 
 
+def use_callable_test_function_can_access():
+    print([callable(obj) for obj in (abs, str, 'Ni!')])
+
+
 if __name__ == '__main__':
     # func_attr()
     # func_as_key_in_map()
     # func_as_key_in_sorted()
     # func_as_key_in_sorted2()
-    higher_order_function_replacement()
+    # higher_order_function_replacement()
+    use_callable_test_function_can_access()
