@@ -52,9 +52,27 @@ def alter_duck(birdie: Duck):
 
 
 def alter_bird(birdie: Bird):
+    # 这里会提示: 类 'Bird' 的未解析的特性引用 'quack';
+    # 但是也只是提醒, 如果出现错误将会在运行时报错, 编译器不会
     birdie.quack()
 
 
+def daffy_duck_class():
+    daffy = Duck()
+    alter(daffy)
+    alter_duck(daffy)
+    alter_bird(daffy)
+
+
+def woody_duck_class():
+    woody = Bird()
+    alter(woody)
+    # 这里会失败
+    alter_duck(woody)
+    alter_bird(woody)
+
 if __name__ == '__main__':
     # print(show_count(1, 'bird'))
-    print(show_count2(1, 'bird'))
+    # print(show_count2(1, 'bird'))
+    # daffy_duck_class()
+    woody_duck_class()
