@@ -1,6 +1,7 @@
 # 注解中可用的类型
-from typing import Any, Union
+from typing import Any, Union, NamedTuple
 from geolib import geohash as gh
+from collections import Sequence
 
 
 # 1. Any类型
@@ -50,6 +51,8 @@ def tokenize(text: str) -> list[str]:
 #   1. 用作记录的元组
 #   2. 带有具名字段, 用作记录的元组
 #   3. 用作不可变序列的元组
+
+# 1. 用作记录的元组
 def record_with_tuple():
     shanghai = 31.2304, 121.4737
     print(geohash(shanghai))
@@ -57,3 +60,32 @@ def record_with_tuple():
 
 def geohash(lat_lon: tuple[float, float]) -> str:
     return gh.encode(*lat_lon, 9)
+
+
+# 2. 带有具名字段, 用作记录的元组
+class Coordinate(NamedTuple):
+    lat: float
+    lon: float
+
+
+def geohash2(lat_lon: Coordinate) -> str:
+    return gh.encode(*lat_lon, 9)
+
+
+# typing.NamedTuple是tuple子类的制造工厂, 因此Coordinate与tuple[float, float]相容; 反之则不成立;
+def display(lat_lon: tuple[float, float]) -> str:
+    lat, lon = lat_lon
+    ns = 'N' if lat >= 0 else 'S'
+    ew = 'E' if lon >= 0 else 'W'
+    return f'{abs(lat):0.1f} {ns}, {abs(lon):0.1f} {ew}'
+
+
+# 3. 用作不可变序列的元组
+# tuple[int, ...] 标识元组内元素的数量>= 1, 但是类型只能为int
+# stuff: tuple[Any, ...] 与 stuff: tuple 的意思相同, 都是表示长度不定, 但是可以包含任意类型的元组
+def columnize(sequence: Sequence[str], num_columns: int = 0) -> list[tuple[str, ...]]:
+    if num_columns == 0:
+        num_columns = round(len(sequence) ** 0.5)
+    num_rows, reminder = divmod(len(sequence), num_columns)
+    num_rows += bool(reminder)
+    return [tuple(sequence[i::num_rows]) for i in range(num_rows)]
