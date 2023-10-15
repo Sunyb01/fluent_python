@@ -31,7 +31,12 @@ def tag_method_test():
 def parameter_location_only(name, /, first, second):
     print(f'name = {name}, first = {first}, second = {second}')
 
+# PEP 484约定, 在仅限位置参数的名称参数加两个下划线, 可与参数中加'/'的表示法相同
+def parameter_location_only2(__name, first, second):
+    print(f'name = {__name}, first = {first}, second = {second}')
+
 
 if __name__ == '__main__':
     # tag_method_test()
-    parameter_location_only('hello', 'fi', 'se')
+    # parameter_location_only('hello', 'fi', 'se')
+    parameter_location_only2('hello', 'fi', 'se')
