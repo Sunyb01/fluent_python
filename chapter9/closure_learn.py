@@ -2,6 +2,7 @@
 # 闭包就是延伸了作用域的函数, 包括函数主题中引用的非全局变量和局部变量
 # 闭包是一个函数, 它保留了定义函数时存在的自由变量的绑定. 如此一来, 调用函数时, 虽然定义作用域不可用了, 但是仍能使用那些绑定
 # 注意, 只有嵌套在其他函数中的函数才可能需要处理不在全局作用域中的外部变量. 这些外部变量位于外层函数的局部作用域内;
+import functools
 import time
 
 
@@ -78,6 +79,7 @@ def make_averager2():
 #   3. 如果在模块全局作用域内未找到, 则从__builtins__.dict中读取.
 
 # 实现一个简单的装饰器
+# Python中的装饰器与设计模式中的装饰器还是不一致的, 看起来更像aop的思想实现
 # 1. 一个会显示函数运行时间的简单装饰器
 def clock(func):
     def clocked(*args):
@@ -101,8 +103,58 @@ def use_closure_func_clock():
     snooze(.123)
 
 
+# 进阶版
+def clock2(func):
+    @functools.wraps(func)
+    def clocked2(*args, **kwargs):
+        t0 = time.perf_counter()
+        result = func(*args, **kwargs)
+        elapsed = time.perf_counter() - t0
+        name = func.__name__
+        arg_lst = [repr(arg) for arg in args]
+        arg_lst.extend(f'{k}={v}' for k, v in kwargs.items())
+        arg_str = ', '.join(arg_lst)
+        print(f'[{elapsed:0.8f}s] {name}({arg_str}) -> {result!r}')
+        return result
+
+    return clocked2
+
+
+@clock2
+def factorial(n, key=None):
+    return 1 if n < 2 else n * factorial(n - 1, key)
+
+
+def use_closure_func_clock2():
+    factorial(2, "hello")
+
+
+# 3. 标准库中的装饰器
+# 3.1 functools.cache
+# @cache装饰器实现了备忘. 这是一项优化, 能把耗时的函数得到的结果保存起来, 避免传入相同的参数时重复计算.
+# 注意:
+#   1. 当前的特性是从3.9版本新增的, 如果是3.8请替换成@lru_cache, 更早的需要写成@lru_cache()
+#   2. 被装饰的函数所接受的参数必须是可哈希的, 因为底层lru_cache使用dict存储
+#   3. @cache可能耗尽内存, @cache更适合短期的命令行脚本; 对于长期运行的进程, 推荐使用@lru_cache, 并设置合理的maxsize参数
+# 示例: 生成第n个斐波那契数, 递归方式非常耗时
+# 当去除@cache时, 发现1重复计算了很多次
+# 另外, 叠放装饰器越靠近函数, 执行的优先级越高; 示例中的叠放相当于 cache(clock(func))
+@functools.cache
+@clock
+def fibonacci(n):
+    if n < 2:
+        return n
+
+    return fibonacci(n - 2) + fibonacci(n - 1)
+
+
+# 4. lru_cache
+
 if __name__ == '__main__':
     print('\n')
     # use_callable_class()
     # use_closure()
-    use_closure_func_clock()
+    # use_closure_func_clock()
+    # print(snooze.__name__)
+    # use_closure_func_clock2()
+    fibonacci(6)
