@@ -2,8 +2,13 @@
 # 闭包就是延伸了作用域的函数, 包括函数主题中引用的非全局变量和局部变量
 # 闭包是一个函数, 它保留了定义函数时存在的自由变量的绑定. 如此一来, 调用函数时, 虽然定义作用域不可用了, 但是仍能使用那些绑定
 # 注意, 只有嵌套在其他函数中的函数才可能需要处理不在全局作用域中的外部变量. 这些外部变量位于外层函数的局部作用域内;
+import decimal
+import fractions
 import functools
+import html
+import numbers
 import time
+from collections import abc
 
 
 # 可调用对象
@@ -149,6 +154,74 @@ def fibonacci(n):
 
 
 # 4. lru_cache
+# 其中默认参数有:
+#   1. maxsize = 128 设定最多可以储存多少条目, 缓存满了之后, 丢弃最不常用的条目; 如果设为None代表LRU逻辑被禁用, 效果和@cache一致
+#   2. typed = False 决定是否把不同的参数类型得到的结果分开保存.
+@functools.lru_cache
+@clock
+def fibonacci2(n):
+    if n < 2:
+        return n
+
+    return fibonacci(n - 2) + fibonacci(n - 1)
+
+
+# 5. singledispatch(单分派泛化函数)
+# Python不支持Java中的重载, 所以常见的做法都是使用if/elfi/else或者match/case实现.
+# 但是快速实现就是通过使用singledispatch装饰器将整体方案拆分为多个模块, 甚至可以为第三方包中无法编辑的类型提供专门的函数.
+# 使用@singledispatch装饰的普通函数, 变成了泛化函数(Java中支持的重载等)
+@functools.singledispatch
+def htmlize(obj):
+    content = html.escape(repr(obj))
+    return f'<pre>{content}</pre>'
+
+
+@htmlize.register
+def _(text: str) -> str:
+    content = html.escape(text).replace('\n', '<br/>\n')
+    return f'<p>{content}</p>'
+
+
+@htmlize.register
+def _(seq: abc.Sequence) -> str:
+    inner = '</li>\n<li>'.join((htmlize(item) for item in seq))
+    return f'<ul>\n<li>' + inner + '</li>\n</ul>'
+
+
+@htmlize.register
+def _(n: numbers.Integral) -> str:
+    return f'<pre>{n}(0x{n:x})</pre>'
+
+
+@htmlize.register
+def _(n: bool) -> str:
+    return f'<pre>{n}</pre>'
+
+
+@htmlize.register(fractions.Fraction)
+def _(x) -> str:
+    frac = fractions.Fraction(x)
+    return f'<pre>{frac.numerator}/{frac.denominator}</pre>'
+
+
+@htmlize.register(decimal.Decimal)
+@htmlize.register(float)
+def _(x) -> str:
+    frac = fractions.Fraction(x).limit_denominator()
+    return f'<pre>{x}({frac.numerator}/{frac.denominator})</pre>'
+
+
+def use_htmlize():
+    print(htmlize({1, 2, 3}))
+    print(abs)
+    print('Heimlich & Co.\n- a game')
+    print(htmlize(42))
+    print(htmlize(['alph', 66, {3, 2, 1}]))
+    print(htmlize(True))
+    print(htmlize(fractions.Fraction(2, 3)))
+    print(htmlize((2 / 3)))
+    print(htmlize((decimal.Decimal('0.02380952'))))
+
 
 if __name__ == '__main__':
     print('\n')
@@ -157,4 +230,6 @@ if __name__ == '__main__':
     # use_closure_func_clock()
     # print(snooze.__name__)
     # use_closure_func_clock2()
-    fibonacci(6)
+    # fibonacci(6)
+    # fibonacci2(20)
+    use_htmlize()
