@@ -2,6 +2,7 @@
 # 闭包就是延伸了作用域的函数, 包括函数主题中引用的非全局变量和局部变量
 # 闭包是一个函数, 它保留了定义函数时存在的自由变量的绑定. 如此一来, 调用函数时, 虽然定义作用域不可用了, 但是仍能使用那些绑定
 # 注意, 只有嵌套在其他函数中的函数才可能需要处理不在全局作用域中的外部变量. 这些外部变量位于外层函数的局部作用域内;
+# 装饰器函数相当于Decorator的具体子类, 而装饰器返回的内部函数相当于此装饰器的实例. 返回的函数包装了被装饰的函数,相当于设计模式中的组件;
 import decimal
 import fractions
 import functools
@@ -170,8 +171,10 @@ def fibonacci2(n):
 # Python不支持Java中的重载, 所以常见的做法都是使用if/elfi/else或者match/case实现.
 # 但是快速实现就是通过使用singledispatch装饰器将整体方案拆分为多个模块, 甚至可以为第三方包中无法编辑的类型提供专门的函数.
 # 使用@singledispatch装饰的普通函数, 变成了泛化函数(Java中支持的重载等)
+# 在单分派中使用抽象基类或type.Protocol可以让代码支持抽象基类胡实现协议的类当前和未来的具体子类或虚拟子类.
+# 普通装饰器时, Python会把被装饰的函数作为第一个参数传给装饰器函数.
 @functools.singledispatch
-def htmlize(obj):
+def htmlize(obj: object):
     content = html.escape(repr(obj))
     return f'<pre>{content}</pre>'
 
@@ -221,6 +224,29 @@ def use_htmlize():
     print(htmlize(fractions.Fraction(2, 3)))
     print(htmlize((2 / 3)))
     print(htmlize((decimal.Decimal('0.02380952'))))
+
+
+# 6. 参数化装饰器
+DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({args}) -> {result}'
+
+
+class Clock:
+    def __init__(self, fmt=DEFAULT_FMT):
+        self.fmt = fmt
+
+    def __call__(self, func):
+        def clocked(*args, **kwargs):
+            t0 = time.perf_counter()
+            result = func(*args, **kwargs)
+            elapsed = time.perf_counter() - t0
+            name = func.__name__
+            arg_lst = [repr(arg) for arg in args]
+            arg_lst.extend(f'{k}={v}' for k, v in kwargs.items())
+            arg_str = ', '.join(arg_lst)
+            print(f'[{elapsed:0.8f}s] {name}({arg_str}) -> {result!r}')
+            return result
+
+        return clocked
 
 
 if __name__ == '__main__':
