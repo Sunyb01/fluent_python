@@ -15,10 +15,11 @@ import math
 # 当应用程序真正需要这些特殊方法时才应实现它们.
 # 当前这个类知识一个特例, 不是每个用户定义的类都需要这样做.
 class Vector2d:
-    typecode = 'd'
-
     # 如果一个类的__init__方法可能有全都赋值给实例属性的必需的参数和可选参数, __match__args__应当列出必需的参数, 而不必列出可选的参数. 类似于Java中只提供了一个有参的构造函数.
     __match_args__ = ('x', 'y')
+    __slots__ = ('__x', '__y')
+    # 可以在自定义的子类中重新定义, 以达到覆盖的效果. Django基于类的视图就大量使用了这种技术.
+    typecode = 'd'
 
     def __init__(self, x, y):
         self.__x = float(x)
@@ -131,6 +132,52 @@ def print_private_var(v: Vector2d):
     print(v._Vector2d__x)
 
 
+# 11.11 使用__slots__ 节省空间
+# 如果类中定义一个名为__slots__的类属性, 以序列的形式存储属性名称, 那么Python将使用其他模型存储实例属性: __slots__中的属性名称存储在一个隐藏的应用数组中, 消耗的比字典少.
+# 超类的__slots__属性会被添加到当前类的__slots__属性中
+# 如果将__dict__放入__slots__中, 则实例会在各个实例独有的引用数组中存储__slots__中的名称, 也支持动态创建属性, 存储在常规的__dict__中. 如果想使用@cache_property装饰器, 就要这么做.
+# 粗心的优化甚至比提早优化还要糟糕, 往往得不偿失.
+# 还有一个属性需要注意-> __weakref__. 为了让对象支持弱引用, 必须要有这个属性.
+# 用户定义的类中, 默认就有__weakref__.如果类中定义了__slots__, 而且想把该类的实例作为弱引用的目标, 则必须把__weakref__添加到__slots__中.
+class Pixel:
+    __slots__ = ('x', 'y')
+
+
+def use_slots_with_pixel():
+    p = Pixel()
+    # AttributeError: 'Pixel' object has no attribute '__dict__'.
+    print(p.__dict__)
+    print(p.x)
+    p.color = 'red'
+
+
+class OpenPixel(Pixel):
+    pass
+
+
+def use_slots_with_open_pixel():
+    p = OpenPixel()
+    # AttributeError: 'Pixel' object has no attribute '__dict__'.
+    p.x = 8
+    print(p.__dict__)
+    print(p.x)
+    p.color = 'red'
+    print(p.__dict__)
+
+
+class ColorPixel(Pixel):
+    __slots__ = ('color',)
+
+
+def use_slots_with_color_pixel():
+    p = ColorPixel()
+    # AttributeError: 'Pixel' object has no attribute '__dict__'.
+    print(p.__dict__)
+
+
 if __name__ == '__main__':
     # keyword_pattern_demo(Vector2d(x=0, y=0))
-    print_private_var(Vector2d(x=0, y=0))
+    # print_private_var(Vector2d(x=0, y=0))
+    # use_slots_with_pixel()
+    # use_slots_with_open_pixel()
+    use_slots_with_color_pixel()
