@@ -4,10 +4,13 @@ from array import array
 import reprlib
 import math
 from collections import namedtuple
+import functools
 
 
+# 如果实现了__getattr__ , 那么请一定也要重新定义 __setattr__方法, 以防止对象行为的不一致.
 class Vector3d:
     typecode = 'd'
+    __match__args__ = ('x', 'y', 'z', 't')
 
     def __init__(self, components):
         self._components = array(self.typecode, components)
@@ -31,6 +34,15 @@ class Vector3d:
     def __eq__(self, other):
         return tuple(self) == tuple(other)
 
+    def __hash__(self):
+        # 这里也可以使用map()函数, 其在Python2和Python3中的表现并不相同.
+        # Python3中是惰性的, 会创建一个生成器, 按需产出结果.
+        hashes = (hash(x) for x in self._components)
+        # 使用3个参数的方法, 可以避免出现异常: TypeError: reduce() of empty sequence with no initial value
+        # 对于+、| 、^来说, 第三个参数应该为0
+        # 对于* 和& 来说应该为1
+        return functools.reduce(operator.xor(), hashes, 0)
+
     def __abs__(self):
         return math.hypot(*self)
 
@@ -52,6 +64,53 @@ class Vector3d:
         # 而且如果从key中得不到索引, 会报错TypeError
         index = operator.index(key)
         return self._components[index]
+
+    def __getattr__(self, name):
+        """
+            属性检查失败后, 解释器会调用 __getattr__ 方法.
+            简单来说, 对于my_obj.x表达式, Python会检查my_obj实例有没有名为x的属性.
+            如果没有, 就到类(my_obj.__class__)中查找;
+            如果还没有就沿着集成图继续向上查找;
+            如果依旧找不到, 则调用my_obj所属的类中定义的 __getattr__ 方法, 传入self和属性名称的字符串形式(例如'x').
+        :param name: -
+        :return: -
+        """
+        cls = type(self)
+        try:
+            pos = cls.__match__args__.index(name)
+        except ValueError:
+            pos = -1
+        if 0 <= pos < len(self._components):
+            return self._components[pos]
+        msg = f'{cls.__name__!r} object has no attribute {name!r}'
+        raise AttributeError(msg)
+
+    def __setattr__(self, key, value):
+        """
+            在未定义此方法之前. 存在一个问题.
+            如v = Vector3d(range(5))
+            如果是进行了v.x = 10, 然后print(v.x)会输出10;
+            但是当print(v)时, 会发现打印的结果与预期的不一致.
+            这是因为v.x会在v中新增一个和_components同级别的属性'x', 因此使用v.x获取x的属性的值时不会再调用__getattr__方法, 解释器会直接返回v.x绑定的值.
+            注意: 请不要随意使用__slots__进行防止新属性的设置. __slots__ 只应该用于节省内存, 而且仅当内存严重不足时才应该这么做.
+        :param key: -
+        :param value: -
+        :return: -
+        """
+        cls = type(self)
+        if len(key) == 1:
+            if key in cls.__match__args__:
+                # 这些提示词是原作者参考了complex函数后明确的.
+                error = 'readonly attribute {attr_name!r}'
+            elif key.islower():
+                error = "can't set attributes 'a' to 'z' in {cls_name!r}"
+            else:
+                error = ''
+            if error:
+                msg = error.format(cls.__name__, attr_name=key)
+                raise AttributeError(msg)
+            # 因为Python支持多继承, 因此super()这个方法经常用于把子类方法的某些任务委托给超类中适当的方法.
+            super().__setattr__(key, value)
 
     @classmethod
     def frombytes(cls, octets):
