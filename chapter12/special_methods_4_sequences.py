@@ -1,10 +1,12 @@
 # 序列的特殊方法
+import itertools
 import operator
 from array import array
 import reprlib
 import math
 from collections import namedtuple
 import functools
+from itertools import zip_longest
 
 
 # 如果实现了__getattr__ , 那么请一定也要重新定义 __setattr__方法, 以防止对象行为的不一致.
@@ -32,7 +34,13 @@ class Vector3d:
         return (bytes([ord(self.typecode)]) + bytes(self._components))
 
     def __eq__(self, other):
-        return tuple(self) == tuple(other)
+        return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+        # if len(self) != len(other):
+        #     return False
+        # for a, b in zip(self, other):
+        #     if a != b:
+        #         return False
+        # return True
 
     def __hash__(self):
         # 这里也可以使用map()函数, 其在Python2和Python3中的表现并不相同.
@@ -112,6 +120,28 @@ class Vector3d:
             # 因为Python支持多继承, 因此super()这个方法经常用于把子类方法的某些任务委托给超类中适当的方法.
             super().__setattr__(key, value)
 
+    def angle(self, n):
+        r = math.hypot(*self[n:])
+        a = math.atan2(r, self[n - 1])
+        if (n == len(self) - 1) and (self[-1] < 0):
+            return math.pi * 2 - a
+        else:
+            return a
+
+    def angles(self):
+        return (self.angle(n) for n in range(1, len(self)))
+
+    def __format__(self, fmt_spec=''):
+        if fmt_spec.endswith('h'):
+            fmt_spec = fmt_spec[:-1]
+            coords = itertools.chain([abs(self)], self.angles())
+            outer_fmt = '<{}>'
+        else:
+            coords = self
+            outer_fmt = '({})'
+        components = (format(c, fmt_spec) for c in coords)
+        return outer_fmt.format(', '.join(components))
+
     @classmethod
     def frombytes(cls, octets):
         typecode = chr(octets[0])
@@ -156,6 +186,14 @@ class FrenchDeck:
         return self._cards[position]
 
 
+def zip_func_test():
+    print(zip(range(3), 'ABC'))
+    print(list(zip(range(3), 'ABC')))
+    print(list(zip(range(3), 'ABC', [0.0, 1.1, 2.2, 3.3, ])))
+    print(list(zip_longest(range(3), 'ABC', [0.0, 1.1, 2.2, 3.3, ], fillvalue=-1)))
+
+
 if __name__ == '__main__':
     # can_get_len_and_index()
-    can_use_slice()
+    # can_use_slice()
+    zip_func_test()
