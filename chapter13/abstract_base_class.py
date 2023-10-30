@@ -29,3 +29,12 @@ class Tombola(abc.ABC):
                 break
         self.load(items)
         return tuple(items)
+
+# 装饰器 @abc.abstractmethod 使用示例
+class MyAbc(abc.ABC):
+
+    @classmethod
+    @abc.abstractmethod
+    def an_abstract_method(self):
+        """ 与其他方法描述符一起使用时, abstractmethod应该放在最里层"""
+        pass
