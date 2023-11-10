@@ -4,6 +4,7 @@ from array import array
 import reprlib
 import math
 import functools
+from collections import abc
 
 
 class Vector4d:
@@ -30,7 +31,10 @@ class Vector4d:
         return (bytes([ord(self.typecode)]) + bytes(self._components))
 
     def __eq__(self, other):
-        return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+        if isinstance(other, Vector4d):
+            return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+        else:
+            return NotImplemented
         # if len(self) != len(other):
         #     return False
         # for a, b in zip(self, other):
@@ -145,9 +149,21 @@ class Vector4d:
 
         return Vector4d(n * factor for n in self)
 
-
     def __rmul__(self, scalar):
         return self * scalar
+
+    def __matmul__(self, other):
+        if (isinstance(other, abc.Sized) and
+                isinstance(other, abc.Iterable)):
+            if len(self) == len(other):
+                return sum(a * b for a, b in zip(self, other))
+            else:
+                raise ValueError('@ requires vectors of equal length.')
+        else:
+            return NotImplemented
+
+    def __rmatmul__(self, other):
+        return self @ other
 
     def __format__(self, fmt_spec=''):
         if fmt_spec.endswith('h'):
