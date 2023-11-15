@@ -7,6 +7,7 @@ def averager() -> Generator[float, float, None]:
     """ 每次激活之后, 协程在yield处暂停, 等待发送值. coro_ave.send(10)那一行发送一个值, 激活协程,
         yield表达式把得到的值(10)赋给term变量. 循环余下的部分更新total、count和average这三个变量.
         while循环的下一次迭代产出average变量的值, 协程在yield关键字处再一次暂停.
+        协程可以重复关闭, 关闭后不可以再次发送数据, 否则会抛出StopIteration
     """
     total = 0.0
     count = 0
