@@ -42,6 +42,17 @@ def example_for_looking_glass():
     print(what)
 
 
+def use_looking_glass_out_with():
+    manager = LookingGlass()
+    print(manager)
+    monster = manager.__enter__()
+    print(monster == 'JABBERWOCKY')
+    print(manager)
+    manager.__exit__(None, None, None)
+    print(monster)
+
+
 if __name__ == '__main__':
     # read_py_file()
-    example_for_looking_glass()
+    # example_for_looking_glass()
+    use_looking_glass_out_with()
