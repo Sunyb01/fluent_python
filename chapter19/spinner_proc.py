@@ -2,10 +2,15 @@
 
 import itertools
 import time
-from threading import Thread, Event
+from multiprocessing import Process, Event
+from multiprocessing import synchronize
 
 
-def spin(msg: str, done: Event) -> None:
+# Python3.8开始, 标准库提供了multiprocessing.shared_memory包, 但是不支持用户定义类的实例.
+# 除了原始字节, 这个包还允许进程共享一个ShareableList. 这是一个可变序列类型, 存放固定数量的项,
+# 项的类型可以是int、float、bool和None, 以及单项不超过10MB的str和bytes.
+
+def spin(msg: str, done: synchronize.Event) -> None:
     for char in itertools.cycle(r'\|/-'):
         status = f'\r{char} {msg}'
         print(status, end='', flush=True)
@@ -23,7 +28,8 @@ def slow() -> int:
 
 def supervisor() -> int:
     done = Event()
-    spinner = Thread(target=spin, args=('thinking!', done))
+    # 跨进程传递的数据只有Even状态, 在multiprocessing模块底层的C代码中, Event状态通过操作系统底层信号量实现.
+    spinner = Process(target=spin, args=('thinking!', done))
     print(f'spinner object: {spinner}')
     spinner.start()
     result = slow()
